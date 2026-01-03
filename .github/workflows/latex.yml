@@ -8,14 +8,14 @@ on:
 jobs:
   build_latex:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/xu-cheng/latex-action:full  # Image plus récente et maintenue
     steps:
       - name: Set up Git repository
         uses: actions/checkout@v4
 
-      - name: Install missing packages (si nécessaire)
-        run: apt-get update && apt-get install -y git
+      - name: Install LaTeX (TeX Live)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y texlive-full biber latexmk
 
       - name: Compile LaTeX document (BibLaTeX)
         run: |
