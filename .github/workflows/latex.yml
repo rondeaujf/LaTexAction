@@ -2,8 +2,6 @@ name: Build LaTeX document
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
   build_latex:
@@ -12,30 +10,17 @@ jobs:
       - name: Set up Git repository
         uses: actions/checkout@v4
 
-      - name: Install LaTeX (TeX Live)
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y texlive-full biber latexmk
-
-      - name: Compile LaTeX document (BibLaTeX)
-        run: |
-          pdflatex main.tex
-          biber main
-          pdflatex main.tex
-          pdflatex main.tex
+      - name: Compile LaTeX document
+        # Cette action utilise une image Docker légère avec TeX Live déjà installé
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: main.tex
+          # latexmk s'occupe de lancer pdflatex et biber autant de fois que nécessaire
+          args: -pdf -file-line-error -halt-on-error -interaction=nonstopmode
+          compiler: latexmk
 
       - name: Upload PDF
         uses: actions/upload-artifact@v4
         with:
           name: PDF
           path: main.pdf
-
-      - name: Release PDF (optionnel)
-        if: github.ref == 'refs/heads/main'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: main.pdf
-          tag_name: latest
-          name: Dernière version du PDF
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
